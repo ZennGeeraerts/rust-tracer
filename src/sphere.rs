@@ -3,7 +3,7 @@ use crate::hittable;
 use crate::hittable::{HitRecord, Hittable};
 use crate::ray::Ray;
 use crate::vec3;
-use crate::vec3::Point3;
+use crate::vec3::{Point3, Vec3};
 
 pub struct Sphere {
     origin: Point3,
@@ -39,18 +39,25 @@ impl Hittable for Sphere {
 
         let sqrtd = discriminant.sqrt();
 
-        let mut root = (-half_b - sqrtd) / a;
-        if !(hittable::T_MIN < root && root < hittable::T_MAX) {
-            root = (-half_b + sqrtd) / a;
-            if !(hittable::T_MIN < root && root < hittable::T_MAX) {
+        let mut t = (-half_b - sqrtd) / a;
+        if !(hittable::T_MIN < t && t < hittable::T_MAX) {
+            t = (-half_b + sqrtd) / a;
+            if !(hittable::T_MIN < t && t < hittable::T_MAX) {
                 return false;
             }
         }
 
-        hit_record.t_val = root;
+        hit_record.t_val = t;
 
         hit_record.hit_point = ray.origin() + hit_record.t_val * ray.direction();
-        hit_record.color = Color::new(1.0, 0.0, 0.0);
+        hit_record.normal =
+            vec3::unit_vector(ray.sample(hit_record.t_val) - Vec3::new(0.0, 0.0, -1.0));
+        hit_record.color = 0.5
+            * Color::new(
+                hit_record.normal.x() + 1.0,
+                hit_record.normal.y() + 1.0,
+                hit_record.normal.z() + 1.0,
+            );
         true
     }
 }
