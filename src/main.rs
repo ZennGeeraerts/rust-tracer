@@ -24,7 +24,8 @@ fn main() {
     scene.push(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
     scene.push(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
 
-    let camera = Camera::new(45.0, IMAGE_WIDTH as f32, IMAGE_HEIGHT as f32, 0.1, 100.0);
+    let mut camera = Camera::new(45.0, IMAGE_WIDTH, IMAGE_HEIGHT, 0.1, 100.0);
+    camera.calculate_ray_dirs();
 
     renderer.render(&scene, &camera);
 

@@ -24,10 +24,7 @@ impl Renderer {
     pub fn render(&mut self, scene: &HittableList, camera: &Camera) {
         for y in 0..self.height {
             for x in 0..self.width {
-                let u = x as f32 / (self.width - 1) as f32;
-                let v = 1.0 - (y as f32 / (self.height - 1) as f32);
-
-                let ray = camera.get_ray(u, v);
+                let ray = camera.get_ray(x, y);
 
                 let pixel_color = self.trace_ray(&ray, &scene);
 
