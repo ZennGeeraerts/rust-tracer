@@ -1,7 +1,9 @@
+use core::f64;
+
 use crate::color::Color;
 use crate::hittable::{HitRecord, Hittable};
+use crate::hittable_list::HittableList;
 use crate::ray::Ray;
-use crate::sphere::Sphere;
 use crate::vec3;
 use crate::vec3::{Point3, Vec3};
 
@@ -22,7 +24,7 @@ impl Renderer {
         }
     }
 
-    pub fn render(&mut self) {
+    pub fn render(&mut self, scene: &HittableList) {
         let aspect_ratio = self.width as f64 / self.height as f64;
         let viewport_height = 2.0;
         let viewport_width = aspect_ratio * viewport_height;
@@ -34,20 +36,20 @@ impl Renderer {
         let lower_left_corner =
             origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
 
-        for j in (0..self.height).rev() {
-            for i in 0..self.width {
-                let u = i as f64 / (self.width - 1) as f64;
-                let v = j as f64 / (self.height - 1) as f64;
+        for y in 0..self.height {
+            for x in 0..self.width {
+                let u = x as f64 / (self.width - 1) as f64;
+                let v = 1.0 - (y as f64 / (self.height - 1) as f64);
                 let ray = Ray::new(
                     origin,
                     lower_left_corner + u * horizontal + v * vertical - origin,
                 );
 
-                let pixel_color = self.background_color(&ray);
+                let pixel_color = self.trace_ray(&ray, &scene);
 
                 self.img.put_pixel(
-                    i,
-                    j,
+                    x,
+                    y,
                     Rgb([
                         (255.999 * pixel_color.x()) as u8,
                         (255.999 * pixel_color.y()) as u8,
@@ -62,10 +64,9 @@ impl Renderer {
         &self.img
     }
 
-    fn background_color(&self, ray: &Ray) -> Color {
-        let sphere = Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5);
+    fn trace_ray(&self, ray: &Ray, scene: &HittableList) -> Color {
         let mut hit_record = HitRecord::default();
-        if sphere.hit(ray, &mut hit_record) {
+        if scene.hit(ray, &mut hit_record, 0.0, f64::INFINITY) {
             return hit_record.color;
         }
 

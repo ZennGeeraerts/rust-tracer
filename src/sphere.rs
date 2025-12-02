@@ -25,7 +25,7 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, ray: &Ray, hit_record: &mut HitRecord) -> bool {
+    fn hit(&self, ray: &Ray, hit_record: &mut HitRecord, t_min: f64, t_max: f64) -> bool {
         let oc = ray.origin() - self.origin;
 
         let a = ray.direction().magnitude_sqr();
@@ -40,9 +40,9 @@ impl Hittable for Sphere {
         let sqrtd = discriminant.sqrt();
 
         let mut t = (-half_b - sqrtd) / a;
-        if !(hittable::T_MIN < t && t < hittable::T_MAX) {
+        if !(t_min < t && t < t_max) {
             t = (-half_b + sqrtd) / a;
-            if !(hittable::T_MIN < t && t < hittable::T_MAX) {
+            if !(t_min < t && t < t_max) {
                 return false;
             }
         }

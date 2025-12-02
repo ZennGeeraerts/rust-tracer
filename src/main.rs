@@ -1,11 +1,15 @@
 mod color;
 mod hittable;
+mod hittable_list;
 mod ray;
 mod renderer;
 mod sphere;
 mod vec3;
 
+use hittable_list::HittableList;
 use renderer::Renderer;
+use sphere::Sphere;
+use vec3::Point3;
 
 fn main() {
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
@@ -13,7 +17,12 @@ fn main() {
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
 
     let mut renderer = Renderer::new(IMAGE_WIDTH, IMAGE_HEIGHT);
-    renderer.render();
+
+    let mut scene = HittableList::default();
+    scene.push(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
+    scene.push(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
+
+    renderer.render(&scene);
 
     renderer.img().save("render.png").unwrap();
 }
