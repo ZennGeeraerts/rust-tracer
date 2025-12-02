@@ -1,3 +1,4 @@
+mod camera;
 mod color;
 mod hittable;
 mod hittable_list;
@@ -6,6 +7,7 @@ mod ray;
 mod renderer;
 mod sphere;
 
+use camera::Camera;
 use hittable_list::HittableList;
 use point3::Point3;
 use renderer::Renderer;
@@ -22,7 +24,9 @@ fn main() {
     scene.push(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
     scene.push(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
 
-    renderer.render(&scene);
+    let camera = Camera::new(45.0, IMAGE_WIDTH as f32, IMAGE_HEIGHT as f32, 0.1, 100.0);
+
+    renderer.render(&scene, &camera);
 
     renderer.img().save("render.png").unwrap();
 }
