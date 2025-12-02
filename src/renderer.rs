@@ -1,12 +1,10 @@
-use core::f64;
-
 use crate::color::Color;
 use crate::hittable::{HitRecord, Hittable};
 use crate::hittable_list::HittableList;
+use crate::point3::Point3;
 use crate::ray::Ray;
-use crate::vec3;
-use crate::vec3::{Point3, Vec3};
 
+use glam::Vec3;
 use image::{Rgb, RgbImage};
 
 pub struct Renderer {
@@ -25,7 +23,7 @@ impl Renderer {
     }
 
     pub fn render(&mut self, scene: &HittableList) {
-        let aspect_ratio = self.width as f64 / self.height as f64;
+        let aspect_ratio = self.width as f32 / self.height as f32;
         let viewport_height = 2.0;
         let viewport_width = aspect_ratio * viewport_height;
         let focal_length = 1.0;
@@ -38,8 +36,8 @@ impl Renderer {
 
         for y in 0..self.height {
             for x in 0..self.width {
-                let u = x as f64 / (self.width - 1) as f64;
-                let v = 1.0 - (y as f64 / (self.height - 1) as f64);
+                let u = x as f32 / (self.width - 1) as f32;
+                let v = 1.0 - (y as f32 / (self.height - 1) as f32);
                 let ray = Ray::new(
                     origin,
                     lower_left_corner + u * horizontal + v * vertical - origin,
@@ -51,9 +49,9 @@ impl Renderer {
                     x,
                     y,
                     Rgb([
-                        (255.999 * pixel_color.x()) as u8,
-                        (255.999 * pixel_color.y()) as u8,
-                        (255.999 * pixel_color.z()) as u8,
+                        (255.999 * pixel_color.x) as u8,
+                        (255.999 * pixel_color.y) as u8,
+                        (255.999 * pixel_color.z) as u8,
                     ]),
                 );
             }
@@ -66,12 +64,12 @@ impl Renderer {
 
     fn trace_ray(&self, ray: &Ray, scene: &HittableList) -> Color {
         let mut hit_record = HitRecord::default();
-        if scene.hit(ray, &mut hit_record, 0.0, f64::INFINITY) {
+        if scene.hit(ray, &mut hit_record, 0.0, f32::INFINITY) {
             return hit_record.color;
         }
 
-        let unit_dir = vec3::unit_vector(ray.direction());
-        let t = 0.5 * (unit_dir.y() + 1.0);
+        let unit_dir = ray.direction().normalize();
+        let t = 0.5 * (unit_dir.y + 1.0);
         (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
     }
 }

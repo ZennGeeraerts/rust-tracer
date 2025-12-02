@@ -1,4 +1,6 @@
-use crate::vec3::{Point3, Vec3};
+use crate::point3::Point3;
+
+use glam::Vec3;
 
 #[derive(Default)]
 pub struct Ray {
@@ -19,7 +21,7 @@ impl Ray {
         self.dir
     }
 
-    pub fn sample(&self, t: f64) -> Point3 {
-        self.origin + t * self.dir
+    pub fn sample(&self, t: f32) -> Point3 {
+        self.origin + self.dir * t
     }
 }

@@ -1,15 +1,15 @@
 mod color;
 mod hittable;
 mod hittable_list;
+mod point3;
 mod ray;
 mod renderer;
 mod sphere;
-mod vec3;
 
 use hittable_list::HittableList;
+use point3::Point3;
 use renderer::Renderer;
 use sphere::Sphere;
-use vec3::Point3;
 
 fn main() {
     const ASPECT_RATIO: f64 = 16.0 / 9.0;

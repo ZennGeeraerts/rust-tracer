@@ -1,17 +1,15 @@
 use crate::color::Color;
-use crate::hittable;
 use crate::hittable::{HitRecord, Hittable};
+use crate::point3::Point3;
 use crate::ray::Ray;
-use crate::vec3;
-use crate::vec3::{Point3, Vec3};
 
 pub struct Sphere {
     origin: Point3,
-    radius: f64,
+    radius: f32,
 }
 
 impl Sphere {
-    pub fn new(origin: Point3, radius: f64) -> Self {
+    pub fn new(origin: Point3, radius: f32) -> Self {
         Self { origin, radius }
     }
 
@@ -19,18 +17,18 @@ impl Sphere {
         self.origin
     }
 
-    pub fn radius(&self) -> f64 {
+    pub fn radius(&self) -> f32 {
         self.radius
     }
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, ray: &Ray, hit_record: &mut HitRecord, t_min: f64, t_max: f64) -> bool {
+    fn hit(&self, ray: &Ray, hit_record: &mut HitRecord, t_min: f32, t_max: f32) -> bool {
         let oc = ray.origin() - self.origin;
 
-        let a = ray.direction().magnitude_sqr();
-        let half_b = vec3::dot(oc, ray.direction());
-        let c = oc.magnitude_sqr() - self.radius * self.radius;
+        let a = ray.direction().length_squared();
+        let half_b = oc.dot(ray.direction());
+        let c = oc.length_squared() - self.radius * self.radius;
 
         let discriminant = half_b * half_b - a * c;
         if discriminant < 0.0 {
@@ -53,9 +51,9 @@ impl Hittable for Sphere {
         hit_record.set_face_normal(ray, outward_normal);
         hit_record.color = 0.5
             * Color::new(
-                hit_record.normal.x() + 1.0,
-                hit_record.normal.y() + 1.0,
-                hit_record.normal.z() + 1.0,
+                hit_record.normal.x + 1.0,
+                hit_record.normal.y + 1.0,
+                hit_record.normal.z + 1.0,
             );
         true
     }
