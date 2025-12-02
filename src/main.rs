@@ -4,14 +4,13 @@ mod ray;
 mod sphere;
 mod vec3;
 
-use std::io;
+use image::{Rgb, RgbImage};
 
 use color::Color;
+use hittable::{HitRecord, Hittable};
 use ray::Ray;
 use sphere::Sphere;
 use vec3::{Point3, Vec3};
-
-use crate::hittable::{HitRecord, Hittable};
 
 fn background_color(ray: &Ray) -> Color {
     let sphere = Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5);
@@ -29,6 +28,7 @@ fn main() {
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
     const IMAGE_WIDTH: u32 = 400;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
+    let mut img = RgbImage::new(IMAGE_WIDTH, IMAGE_HEIGHT);
 
     let viewport_height = 2.0;
     let viewport_width = ASPECT_RATIO * viewport_height;
@@ -53,9 +53,19 @@ fn main() {
             );
 
             let pixel_color = background_color(&ray);
-            color::write_color(&mut io::stdout(), pixel_color);
+
+            img.put_pixel(
+                i,
+                j,
+                Rgb([
+                    (255.999 * pixel_color.x()) as u8,
+                    (255.999 * pixel_color.y()) as u8,
+                    (255.999 * pixel_color.z()) as u8,
+                ]),
+            );
         }
     }
 
+    img.save("render.png").unwrap();
     eprint!("\nDone.\n");
 }
