@@ -1,71 +1,19 @@
 mod color;
 mod hittable;
 mod ray;
+mod renderer;
 mod sphere;
 mod vec3;
 
-use image::{Rgb, RgbImage};
-
-use color::Color;
-use hittable::{HitRecord, Hittable};
-use ray::Ray;
-use sphere::Sphere;
-use vec3::{Point3, Vec3};
-
-fn background_color(ray: &Ray) -> Color {
-    let sphere = Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5);
-    let mut hit_record = HitRecord::default();
-    if sphere.hit(ray, &mut hit_record) {
-        return hit_record.color;
-    }
-
-    let unit_dir = vec3::unit_vector(ray.direction());
-    let t = 0.5 * (unit_dir.y() + 1.0);
-    (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
-}
+use renderer::Renderer;
 
 fn main() {
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
     const IMAGE_WIDTH: u32 = 400;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
-    let mut img = RgbImage::new(IMAGE_WIDTH, IMAGE_HEIGHT);
 
-    let viewport_height = 2.0;
-    let viewport_width = ASPECT_RATIO * viewport_height;
-    let focal_length = 1.0;
+    let mut renderer = Renderer::new(IMAGE_WIDTH, IMAGE_HEIGHT);
+    renderer.render();
 
-    let origin = Point3::new(0.0, 0.0, 0.0);
-    let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
-    let vertical = Vec3::new(0.0, viewport_height, 0.0);
-    let lower_left_corner =
-        origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
-
-    print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
-
-    for j in (0..IMAGE_HEIGHT).rev() {
-        eprint!("\rScanlines remaining: {}", j);
-        for i in 0..IMAGE_WIDTH {
-            let u = i as f64 / (IMAGE_WIDTH - 1) as f64;
-            let v = j as f64 / (IMAGE_HEIGHT - 1) as f64;
-            let ray = Ray::new(
-                origin,
-                lower_left_corner + u * horizontal + v * vertical - origin,
-            );
-
-            let pixel_color = background_color(&ray);
-
-            img.put_pixel(
-                i,
-                j,
-                Rgb([
-                    (255.999 * pixel_color.x()) as u8,
-                    (255.999 * pixel_color.y()) as u8,
-                    (255.999 * pixel_color.z()) as u8,
-                ]),
-            );
-        }
-    }
-
-    img.save("render.png").unwrap();
-    eprint!("\nDone.\n");
+    renderer.img().save("render.png").unwrap();
 }
