@@ -52,7 +52,7 @@ fn main() {
     )));
     scene.push(Box::new(Sphere::new(
         Point3::new(-1.0, 0.0, -2.0),
-        0.5,
+        -0.4,
         material_left,
     )));
     scene.push(Box::new(Sphere::new(
