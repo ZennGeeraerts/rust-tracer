@@ -1,15 +1,16 @@
-use crate::color::Color;
+use crate::material::Material;
 use crate::point3::Point3;
 use crate::ray::Ray;
 
 use glam::Vec3;
+use std::rc::Rc;
 
 #[derive(Default, Clone)]
 pub struct HitRecord {
     pub hit_point: Point3,
     pub t_val: f32,
-    pub color: Color,
     pub normal: Vec3,
+    pub material: Option<Rc<dyn Material>>,
     pub front_face: bool,
 }
 

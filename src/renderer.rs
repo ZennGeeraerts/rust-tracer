@@ -59,13 +59,19 @@ impl Renderer {
 
         let mut hit_record = HitRecord::default();
         if scene.hit(ray, &mut hit_record, 0.001, f32::INFINITY) {
-            let direction = hit_record.normal + utils::random_unit_vec3();
-            return 0.5
-                * self.trace_ray(
-                    &Ray::new(hit_record.hit_point, direction),
-                    scene,
-                    recursion_depth - 1,
-                );
+            let mut attenuation = Color::default();
+            let mut scattered = Ray::default();
+
+            if hit_record.material.as_ref().unwrap().scatter(
+                ray,
+                &hit_record,
+                &mut attenuation,
+                &mut scattered,
+            ) {
+                return attenuation * self.trace_ray(&scattered, scene, recursion_depth - 1);
+            } else {
+                return Color::new(0.0, 0.0, 0.0);
+            }
         }
 
         let unit_dir = ray.direction().normalize();

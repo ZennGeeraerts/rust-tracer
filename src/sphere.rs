@@ -1,16 +1,24 @@
 use crate::color::Color;
 use crate::hittable::{HitRecord, Hittable};
+use crate::material::Material;
 use crate::point3::Point3;
 use crate::ray::Ray;
+
+use std::rc::Rc;
 
 pub struct Sphere {
     origin: Point3,
     radius: f32,
+    material: Rc<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(origin: Point3, radius: f32) -> Self {
-        Self { origin, radius }
+    pub fn new(origin: Point3, radius: f32, material: Rc<dyn Material>) -> Self {
+        Self {
+            origin,
+            radius,
+            material,
+        }
     }
 
     pub fn origin(&self) -> Point3 {
@@ -49,12 +57,7 @@ impl Hittable for Sphere {
         hit_record.hit_point = ray.sample(hit_record.t_val);
         let outward_normal = (hit_record.hit_point - self.origin) / self.radius;
         hit_record.set_face_normal(ray, outward_normal);
-        hit_record.color = 0.5
-            * Color::new(
-                hit_record.normal.x + 1.0,
-                hit_record.normal.y + 1.0,
-                hit_record.normal.z + 1.0,
-            );
+        hit_record.material = Some(self.material.clone());
         true
     }
 }

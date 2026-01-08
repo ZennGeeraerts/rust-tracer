@@ -2,6 +2,7 @@ mod camera;
 mod color;
 mod hittable;
 mod hittable_list;
+mod material;
 mod point3;
 mod ray;
 mod renderer;
@@ -9,10 +10,13 @@ mod sphere;
 mod utils;
 
 use camera::Camera;
+use color::Color;
 use hittable_list::HittableList;
+use material::{Lambertian, Metal};
 use point3::Point3;
 use renderer::Renderer;
 use sphere::Sphere;
+use std::rc::Rc;
 
 fn main() {
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
@@ -23,8 +27,32 @@ fn main() {
     let mut renderer = Renderer::new(IMAGE_WIDTH, IMAGE_HEIGHT, SAMPLES_PER_PIXEL);
 
     let mut scene = HittableList::default();
-    scene.push(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
-    scene.push(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
+
+    let material_ground = Rc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
+    let material_center = Rc::new(Lambertian::new(Color::new(0.7, 0.3, 0.3)));
+    let material_left = Rc::new(Metal::new(Color::new(0.8, 0.8, 0.8)));
+    let material_right = Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2)));
+
+    scene.push(Box::new(Sphere::new(
+        Point3::new(0.0, -100.5, -1.0),
+        100.0,
+        material_ground,
+    )));
+    scene.push(Box::new(Sphere::new(
+        Point3::new(0.0, 0.0, -1.0),
+        0.5,
+        material_center,
+    )));
+    scene.push(Box::new(Sphere::new(
+        Point3::new(-1.0, 0.0, -1.0),
+        0.5,
+        material_left,
+    )));
+    scene.push(Box::new(Sphere::new(
+        Point3::new(1.0, 0.0, -1.0),
+        0.5,
+        material_right,
+    )));
 
     let mut camera = Camera::new(45.0, IMAGE_WIDTH, IMAGE_HEIGHT, 0.1, 100.0);
     camera.calculate_ray_dirs();

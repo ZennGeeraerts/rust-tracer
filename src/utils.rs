@@ -44,3 +44,8 @@ pub fn random_vec3_in_unit_sphere() -> Vec3 {
 pub fn random_unit_vec3() -> Vec3 {
     random_vec3_in_unit_sphere().normalize()
 }
+
+pub fn is_near_zero(v: Vec3) -> bool {
+    const EPSILON: f32 = 1.0e-8;
+    v.length_squared() < EPSILON * EPSILON
+}
