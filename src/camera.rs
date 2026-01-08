@@ -3,6 +3,13 @@ use crate::ray::Ray;
 
 use glam::{Mat4, Vec3, Vec4, Vec4Swizzles};
 
+#[derive(Clone, Copy)]
+pub struct RayDifferential {
+    pub center: Vec3,
+    pub dx: Vec3,
+    pub dy: Vec3,
+}
+
 pub struct Camera {
     projection: Mat4,
     projection_inverse: Mat4,
@@ -15,7 +22,7 @@ pub struct Camera {
     vertical_fov: f32,
     near_plane: f32,
     far_plane: f32,
-    ray_dirs: Vec<Vec3>,
+    ray_dirs: Vec<RayDifferential>,
 }
 
 impl Camera {
@@ -49,6 +56,22 @@ impl Camera {
         }
     }
 
+    pub fn position(&self) -> Vec3 {
+        self.position
+    }
+
+    pub fn forward(&self) -> Vec3 {
+        self.forward
+    }
+
+    pub fn right(&self) -> Vec3 {
+        self.forward.cross(Vec3::Y).normalize()
+    }
+
+    pub fn up(&self) -> Vec3 {
+        self.right().cross(self.forward).normalize()
+    }
+
     pub fn resize(&mut self, width: u32, height: u32) {
         self.width = width;
         self.height = height;
@@ -67,32 +90,53 @@ impl Camera {
         self.calculate_ray_dirs();
     }
 
-    pub fn get_ray(&self, x: u32, y: u32) -> Ray {
-        Ray::new(self.position, self.ray_dirs[(x + y * self.width) as usize])
+    pub fn get_ray_dir(&self, x: u32, y: u32) -> RayDifferential {
+        self.ray_dirs[(x + y * self.width) as usize]
     }
 
     pub fn calculate_ray_dirs(&mut self) {
-        self.ray_dirs
-            .resize((self.width * self.height) as usize, Vec3::ZERO);
+        self.ray_dirs.resize(
+            (self.width * self.height) as usize,
+            RayDifferential {
+                center: Vec3::ZERO,
+                dx: Vec3::ZERO,
+                dy: Vec3::ZERO,
+            },
+        );
 
         for y in 0..self.height {
             for x in 0..self.width {
-                let u = x as f32 / (self.width - 1) as f32;
-                let v = 1.0 - (y as f32 / (self.height - 1) as f32);
+                let cx = x as f32;
+                let cy = y as f32;
 
-                let ndc_x = u * 2.0 - 1.0;
-                let ndc_y = v * 2.0 - 1.0;
+                let center = self.ray_dir_at(cx, cy);
+                let right = self.ray_dir_at(cx + 1.0, cy);
+                let up = self.ray_dir_at(cx, cy + 1.0);
 
-                let target = self.projection_inverse * Vec4::new(ndc_x, ndc_y, 1.0, 1.0);
+                let idx = (x + y * self.width) as usize;
 
-                let ray_dir_view = (target.xyz() / target.w).normalize();
-                let ray_dir_world = (self.world
-                    * Vec4::new(ray_dir_view.x, ray_dir_view.y, ray_dir_view.z, 0.0))
-                .xyz()
-                .normalize();
-
-                self.ray_dirs[(x + y * self.width) as usize] = ray_dir_world;
+                self.ray_dirs[idx] = RayDifferential {
+                    center,
+                    dx: right - center,
+                    dy: up - center,
+                };
             }
         }
+    }
+
+    fn ray_dir_at(&self, px: f32, py: f32) -> Vec3 {
+        let u = px / (self.width - 1) as f32;
+        let v = 1.0 - py / (self.height - 1) as f32;
+
+        let ndc_x = u * 2.0 - 1.0;
+        let ndc_y = v * 2.0 - 1.0;
+
+        let target = self.projection_inverse * Vec4::new(ndc_x, ndc_y, 1.0, 1.0);
+
+        let dir_view = (target.xyz() / target.w).normalize();
+
+        (self.world * Vec4::new(dir_view.x, dir_view.y, dir_view.z, 0.0))
+            .xyz()
+            .normalize()
     }
 }

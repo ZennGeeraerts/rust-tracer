@@ -6,6 +6,7 @@ mod point3;
 mod ray;
 mod renderer;
 mod sphere;
+mod utils;
 
 use camera::Camera;
 use hittable_list::HittableList;
@@ -17,8 +18,9 @@ fn main() {
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
     const IMAGE_WIDTH: u32 = 400;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
+    const SAMPLES_PER_PIXEL: u32 = 100;
 
-    let mut renderer = Renderer::new(IMAGE_WIDTH, IMAGE_HEIGHT);
+    let mut renderer = Renderer::new(IMAGE_WIDTH, IMAGE_HEIGHT, SAMPLES_PER_PIXEL);
 
     let mut scene = HittableList::default();
     scene.push(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
