@@ -31,7 +31,7 @@ impl Material for Lambertian {
         attenuation: &mut Color,
         scattered: &mut Ray,
     ) -> bool {
-        let mut scatter_direction = hit_record.normal * utils::random_unit_vec3();
+        let mut scatter_direction = hit_record.normal + utils::random_unit_vec3();
 
         if utils::is_near_zero(scatter_direction) {
             scatter_direction = hit_record.normal;

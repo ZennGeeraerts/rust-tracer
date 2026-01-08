@@ -131,7 +131,7 @@ impl Camera {
         let ndc_x = u * 2.0 - 1.0;
         let ndc_y = v * 2.0 - 1.0;
 
-        let target = self.projection_inverse * Vec4::new(ndc_x, ndc_y, 1.0, 1.0);
+        let target = self.projection_inverse * Vec4::new(ndc_x, ndc_y, -1.0, 1.0);
 
         let dir_view = (target.xyz() / target.w).normalize();
 
