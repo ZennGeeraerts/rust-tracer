@@ -56,7 +56,7 @@ impl Camera {
         }
     }
 
-    pub fn position(&self) -> Vec3 {
+    pub fn position(&self) -> Point3 {
         self.position
     }
 

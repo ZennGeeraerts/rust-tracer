@@ -40,7 +40,7 @@ impl Renderer {
                     let camera_pos = camera.position();
                     let ray = Ray::new(camera_pos, jittered_dir);
 
-                    pixel_color += self.trace_ray(&ray, &scene);
+                    pixel_color += self.trace_ray(&ray, &scene, 50);
                 }
 
                 self.put_pixel(x, y, pixel_color);
@@ -52,10 +52,20 @@ impl Renderer {
         &self.img
     }
 
-    fn trace_ray(&self, ray: &Ray, scene: &HittableList) -> Color {
+    fn trace_ray(&self, ray: &Ray, scene: &HittableList, recursion_depth: i32) -> Color {
+        if recursion_depth <= 0 {
+            return Color::new(0.0, 0.0, 0.0);
+        }
+
         let mut hit_record = HitRecord::default();
-        if scene.hit(ray, &mut hit_record, 0.0, f32::INFINITY) {
-            return hit_record.color;
+        if scene.hit(ray, &mut hit_record, 0.001, f32::INFINITY) {
+            let direction = hit_record.normal + utils::random_unit_vec3();
+            return 0.5
+                * self.trace_ray(
+                    &Ray::new(hit_record.hit_point, direction),
+                    scene,
+                    recursion_depth - 1,
+                );
         }
 
         let unit_dir = ray.direction().normalize();
@@ -65,9 +75,9 @@ impl Renderer {
 
     fn put_pixel(&mut self, x: u32, y: u32, pixel_color: Color) {
         let scale = 1.0 / self.samples_per_pixel as f32;
-        let r = pixel_color.x * scale;
-        let g = pixel_color.y * scale;
-        let b = pixel_color.z * scale;
+        let r = f32::sqrt(pixel_color.x * scale);
+        let g = f32::sqrt(pixel_color.y * scale);
+        let b = f32::sqrt(pixel_color.z * scale);
 
         self.img.put_pixel(
             x,
