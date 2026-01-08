@@ -13,19 +13,17 @@ impl HittableList {
 }
 
 impl Hittable for HittableList {
-    fn hit(&self, ray: &Ray, hit_record: &mut HitRecord, t_min: f32, t_max: f32) -> bool {
-        let mut temp_record = HitRecord::default();
+    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+        let mut temp_record = None;
         let mut closest_so_far = t_max;
-        let mut is_hit = false;
 
         for hittable in &self.hittables {
-            if hittable.hit(ray, &mut temp_record, t_min, closest_so_far) {
-                is_hit = true;
-                closest_so_far = temp_record.t_val;
-                *hit_record = temp_record.clone();
+            if let Some(hit_record) = hittable.hit(ray, t_min, closest_so_far) {
+                closest_so_far = hit_record.t_val;
+                temp_record = Some(hit_record);
             }
         }
 
-        is_hit
+        temp_record
     }
 }

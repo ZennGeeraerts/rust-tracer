@@ -1,5 +1,4 @@
 use crate::point3::Point3;
-use crate::ray::Ray;
 
 use glam::{Mat4, Vec3, Vec4, Vec4Swizzles};
 

@@ -1,6 +1,6 @@
 use crate::camera::Camera;
 use crate::color::Color;
-use crate::hittable::{HitRecord, Hittable};
+use crate::hittable::Hittable;
 use crate::hittable_list::HittableList;
 use crate::ray::Ray;
 use crate::utils;
@@ -57,18 +57,10 @@ impl Renderer {
             return Color::new(0.0, 0.0, 0.0);
         }
 
-        let mut hit_record = HitRecord::default();
-        if scene.hit(ray, &mut hit_record, 0.001, f32::INFINITY) {
-            let mut attenuation = Color::default();
-            let mut scattered = Ray::default();
-
-            if hit_record.material.as_ref().unwrap().scatter(
-                ray,
-                &hit_record,
-                &mut attenuation,
-                &mut scattered,
-            ) {
-                return attenuation * self.trace_ray(&scattered, scene, recursion_depth - 1);
+        if let Some(hit_record) = scene.hit(ray, 0.001, f32::INFINITY) {
+            if let Some(scatter_record) = hit_record.material.scatter(ray, &hit_record) {
+                return scatter_record.attenuation
+                    * self.trace_ray(&scatter_record.scattered, scene, recursion_depth - 1);
             } else {
                 return Color::new(0.0, 0.0, 0.0);
             }
